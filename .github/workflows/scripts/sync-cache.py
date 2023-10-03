@@ -20,7 +20,7 @@ from ti_build.bootstrap import ensure_dependencies
 from ti_build.dep import escape_url
 
 # -- code --
-ensure_dependencies("boto3")
+#ensure_dependencies("boto3")
 RE = re.compile(r"(https?:\/\/[A-Za-z0-9\-./_%]+\.(tar\.gz|tgz|zip|exe|sh))", re.I)
 base = Path(__file__).parent
 
