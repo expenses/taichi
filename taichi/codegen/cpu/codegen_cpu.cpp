@@ -12,10 +12,9 @@
 #include "taichi/ir/analysis.h"
 #include "taichi/analysis/offline_cache_util.h"
 
-#include "llvm/Support/Host.h"
+#include "llvm/TargetParser/Host.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Transforms/IPO.h"
-#include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/ExecutionEngine/Orc/JITTargetMachineBuilder.h"
 
@@ -284,16 +283,8 @@ void KernelCodeGenCPU::optimize_module(llvm::Module *module) {
   function_pass_manager.add(llvm::createTargetTransformInfoWrapperPass(
       target_machine->getTargetIRAnalysis()));
 
-  llvm::PassManagerBuilder b;
-  b.OptLevel = 3;
-  b.Inliner = llvm::createFunctionInliningPass(b.OptLevel, 0, false);
-  b.LoopVectorize = true;
-  b.SLPVectorize = true;
 
-  target_machine->adjustPassManager(b);
 
-  b.populateFunctionPassManager(function_pass_manager);
-  b.populateModulePassManager(module_pass_manager);
 
   {
     TI_PROFILER("llvm_function_pass");
@@ -313,7 +304,6 @@ void KernelCodeGenCPU::optimize_module(llvm::Module *module) {
     Note there's an update for "separate-const-offset-gep" in llvm-12.
   */
   module_pass_manager.add(llvm::createLoopStrengthReducePass());
-  module_pass_manager.add(llvm::createIndVarSimplifyPass());
   module_pass_manager.add(llvm::createSeparateConstOffsetFromGEPPass(false));
   module_pass_manager.add(llvm::createEarlyCSEPass(true));
 

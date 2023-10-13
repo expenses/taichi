@@ -94,11 +94,6 @@ std::string JITSessionAMDGPU::compile_module_to_hsaco(
             triple_str, AMDGPUContext::get_instance().get_mcpu(), "", options,
             llvm::Reloc::PIC_, llvm::CodeModel::Small,
             llvm::CodeGenOpt::Aggressive));
-    llvm::PassManagerBuilder builder;
-    builder.OptLevel = 3;
-    builder.Inliner =
-        llvm::createFunctionInliningPass(builder.OptLevel, 0, false);
-    builder.populateModulePassManager(module_gen_gcn_pass_manager);
     module_gen_gcn_pass_manager.add(llvm::createTargetTransformInfoWrapperPass(
         machine_gen_gcn->getTargetIRAnalysis()));
     machine_gen_gcn->addPassesToEmitFile(module_gen_gcn_pass_manager,
@@ -119,13 +114,6 @@ std::string JITSessionAMDGPU::compile_module_to_hsaco(
   function_pass_manager.add(llvm::createTargetTransformInfoWrapperPass(
       machine->getTargetIRAnalysis()));
 
-  llvm::PassManagerBuilder builder;
-  builder.OptLevel = 3;
-  builder.Inliner =
-      llvm::createFunctionInliningPass(builder.OptLevel, 0, false);
-  machine->adjustPassManager(builder);
-  builder.populateFunctionPassManager(function_pass_manager);
-  builder.populateModulePassManager(module_pass_manager);
 
   machine->Options.MCOptions.AsmVerbose = true;
 

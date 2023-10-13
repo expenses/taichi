@@ -6,7 +6,6 @@
 #include "llvm/Pass.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Transforms/IPO.h"
-#include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Support/SourceMgr.h"
@@ -274,17 +273,16 @@ struct AMDGPUConvertFuncParamAddressSpacePass : public ModulePass {
       new_func->setComdat(f->getComdat());
       f->getParent()->getFunctionList().insert(f->getIterator(), new_func);
       new_func->takeName(f);
-      new_func->getBasicBlockList().splice(new_func->begin(),
-                                           f->getBasicBlockList());
+      new_func->splice(new_func->begin(),
+                                           f);
       for (llvm::Function::arg_iterator I = f->arg_begin(), E = f->arg_end(),
                                         I2 = new_func->arg_begin();
            I != E; ++I, ++I2) {
         if (I->getType()->getTypeID() == llvm::Type::PointerTyID) {
-          auto &front_bb = new_func->getBasicBlockList().front();
+          auto &front_bb = new_func->front();
           llvm::Instruction *addrspacecast =
               new AddrSpaceCastInst(I2, I->getType());
-          front_bb.getInstList().insertAfter(front_bb.getFirstInsertionPt(),
-                                             addrspacecast);
+          addrspacecast->insertInto(&front_bb, front_bb.getFirstInsertionPt());
           I->replaceAllUsesWith(addrspacecast);
           I2->takeName(&*I);
         } else {
