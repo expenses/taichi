@@ -66,8 +66,9 @@ def build_wheel(python: Command, pip: Command) -> None:
 
 @banner("Install Build Wheel Dependencies")
 def install_build_wheel_deps(python: Command, pip: Command) -> None:
-    pip.install("-U", "pip")
-    pip.install("-r", "requirements_dev.txt")
+    #pip.install("-U", "pip")
+    #pip.install("-r", "requirements_dev.txt")
+    pass
 
 
 def setup_basic_build_env():
